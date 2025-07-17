@@ -11,38 +11,59 @@
   <p id="result"></p>
 
   <script>
-    async function searchData() {
-      const email = document.getElementById("emailInput").value.trim().toLowerCase();
-      const resultDiv = document.getElementById("result");
+  async function searchData() {
+    const email = document.getElementById("emailInput").value.trim().toLowerCase();
+    const resultDiv = document.getElementById("result");
 
-      if (!email) {
-        resultDiv.textContent = "โปรดใส่อีเมลในช่องนี้";
+    if (!email) {
+      resultDiv.textContent = "โปรดใส่อีเมลในช่องนี้";
+      return;
+    }
+
+    const apiUrl = "https://script.google.com/macros/s/AKfycbxzn993JhJxss0KZIIAG0tq1HEu81QPWBVnPF7J9DtXjXGu10J0bA8xryKMvO-im8Qg/exec?email=" + encodeURIComponent(email);
+
+    try {
+      const response = await fetch(apiUrl);
+
+      // ตรวจดูว่า response เป็น JSON หรือข้อความ error
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        // อ่านเป็นข้อความธรรมดา เช่น กรณี error หรือ not found
+        const text = await response.text();
+        resultDiv.textContent = text;
         return;
       }
 
-      const apiUrl = "https://script.google.com/macros/s/AKfycbxzn993JhJxss0KZIIAG0tq1HEu81QPWBVnPF7J9DtXjXGu10J0bA8xryKMvO-im8Qg/exec?email=" + encodeURIComponent(email);
+      const data = await response.json();
 
-      try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        if (data.results.length > 0) {
-          resultDiv.innerHTML = data.results.map(row =>
-            `<div>
-              <strong>ชื่อไลน์:</strong> ${row["Line name"] || "-"}<br>
-              <strong>อีเมล:</strong> ${row["Email"] || "-"}<br>
-              <strong>วันที่เข้า:</strong> ${row["Entry date"] || "-"}<br>
-              <strong>วันหมดอายุ:</strong> ${row["Expiry date"] || "-"}
-            </div>`
-          ).join("<hr>");
-        } else {
-          resultDiv.textContent = "ไม่พบข้อมูล";
-        }
-      } catch (error) {
-        console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
-        resultDiv.textContent = "เกิดข้อผิดพลาดในการดึงข้อมูล";
+      // data คือ object เดี่ยวๆ ไม่ใช่ array
+      if (data && Object.keys(data).length > 0) {
+        resultDiv.innerHTML = `
+          <div>
+            <strong>ชื่อไลน์:</strong> ${data["line name"] || "-"}<br>
+            <strong>อีเมล:</strong> ${data["email"] || "-"}<br>
+            <strong>วันที่เข้า:</strong> ${formatDate(data["entry date"]) || "-"}<br>
+            <strong>วันหมดอายุ:</strong> ${formatDate(data["expiry date"]) || "-"}
+          </div>
+        `;
+      } else {
+        resultDiv.textContent = "ไม่พบข้อมูล";
       }
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
+      resultDiv.textContent = "เกิดข้อผิดพลาดในการดึงข้อมูล";
     }
-  </script>
+  }
+
+  // ฟังก์ชันช่วยแปลงวันที่ ISO เป็นรูปแบบ dd/mm/yyyy
+  function formatDate(dateStr) {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr; // ถ้าไม่ใช่วันที่ แสดงตามเดิม
+    return d.getDate().toString().padStart(2,"0") + "/" + 
+           (d.getMonth()+1).toString().padStart(2,"0") + "/" + 
+           d.getFullYear();
+  }
+</script>
 </body>
 </html>
