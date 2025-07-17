@@ -37,17 +37,19 @@
 
       const data = await response.json();
 
-      if (data && Object.keys(data).length > 0) {
-        resultDiv.innerHTML = `
-          <div>
-            <strong>ชื่อไลน์:</strong> ${data["line name"] || "-"}<br>
-            <strong>อีเมล:</strong> ${data["email"] || "-"}<br>
-            <strong>วันที่เข้า:</strong> ${formatDate(data["entry date"]) || "-"}<br>
-            <strong>วันหมดอายุ:</strong> ${formatDate(data["expiry date"]) || "-"}
-          </div>
-        `;
-      } else {
-        resultDiv.textContent = "ไม่พบข้อมูล";
+if (data.results && data.results.length > 0) {
+  resultDiv.innerHTML = data.results.map(row => `
+    <div style="margin-bottom: 1em;">
+      <strong>ชื่อไลน์:</strong> ${row["line name"] || "-"}<br>
+      <strong>อีเมล:</strong> ${row["email"] || "-"}<br>
+      <strong>วันที่เข้า:</strong> ${formatDate(row["entry date"]) || "-"}<br>
+      <strong>วันหมดอายุ:</strong> ${formatDate(row["expiry date"]) || "-"}
+    </div>
+  `).join("<hr>");
+} else {
+  resultDiv.textContent = "ไม่พบข้อมูล";
+}
+
       }
     } catch (error) {
       console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
