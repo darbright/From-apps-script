@@ -11,60 +11,58 @@
   <p id="result"></p>
 
   <script>
-  async function searchData() {
-    const email = document.getElementById("emailInput").value.trim().toLowerCase();
-    const resultDiv = document.getElementById("result");
+    async function searchData() {
+      const email = document.getElementById("emailInput").value.trim().toLowerCase();
+      const resultDiv = document.getElementById("result");
 
-    if (!email) {
-      resultDiv.textContent = "โปรดใส่อีเมลในช่องนี้";
-      return;
-    }
-
-    // แสดงข้อความกำลังค้นหา
-    resultDiv.textContent = "กำลังค้นหา...";
-
-    const apiUrl = "https://script.google.com/macros/s/AKfycbxzn993JhJxss0KZIIAG0tq1HEu81QPWBVnPF7J9DtXjXGu10J0bA8xryKMvO-im8Qg/exec?email=" + encodeURIComponent(email);
-
-    try {
-      const response = await fetch(apiUrl);
-
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text();
-        resultDiv.textContent = text;
+      if (!email) {
+        resultDiv.textContent = "โปรดใส่อีเมลในช่องนี้";
         return;
       }
 
-      const data = await response.json();
+      resultDiv.textContent = "กำลังค้นหา...";
 
-if (data.results && data.results.length > 0) {
-  resultDiv.innerHTML = data.results.map(row => `
-    <div style="margin-bottom: 1em;">
-      <strong>ชื่อไลน์:</strong> ${row["line name"] || "-"}<br>
-      <strong>อีเมล:</strong> ${row["email"] || "-"}<br>
-      <strong>วันที่เข้า:</strong> ${formatDate(row["entry date"]) || "-"}<br>
-      <strong>วันหมดอายุ:</strong> ${formatDate(row["expiry date"]) || "-"}
-    </div>
-  `).join("<hr>");
-} else {
-  resultDiv.textContent = "ไม่พบข้อมูล";
-}
+      const apiUrl = "https://script.google.com/macros/s/AKfycbzPhMyVymJ8bOf3fzLw302IT4RF9sdNaS9P6-lLRbOFn7DO_uuffIaGbS1WPy8_CWq8/exec?email=" + encodeURIComponent(email);
 
+      try {
+        const response = await fetch(apiUrl);
+
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await response.text();
+          resultDiv.textContent = text;
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.results && data.results.length > 0) {
+          resultDiv.innerHTML = data.results.map(row => `
+            <div style="margin-bottom: 1em;">
+              <strong>ชื่อไลน์:</strong> ${row["line name"] || "-"}<br>
+              <strong>อีเมล:</strong> ${row["email"] || "-"}<br>
+              <strong>วันที่เข้า:</strong> ${formatDate(row["entry date"]) || "-"}<br>
+              <strong>วันหมดอายุ:</strong> ${formatDate(row["expiry date"]) || "-"}
+            </div>
+          `).join("<hr>");
+        } else {
+          resultDiv.textContent = "ไม่พบข้อมูล";
+        }
+      } catch (error) {
+        console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
+        resultDiv.textContent = "เกิดข้อผิดพลาดในการดึงข้อมูล";
       }
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
-      resultDiv.textContent = "เกิดข้อผิดพลาดในการดึงข้อมูล";
     }
-  }
 
-  function formatDate(dateStr) {
-    if (!dateStr) return "-";
-    const d = new Date(dateStr);
-    if (isNaN(d)) return dateStr;
-    return d.getDate().toString().padStart(2,"0") + "/" + 
-           (d.getMonth()+1).toString().padStart(2,"0") + "/" + 
-           d.getFullYear();
-  }
-</script>
+    function formatDate(dateStr) {
+      if (!dateStr) return "-";
+      const d = new Date(dateStr);
+      if (isNaN(d)) return dateStr;
+      return d.getDate().toString().padStart(2,"0") + "/" +
+             (d.getMonth()+1).toString().padStart(2,"0") + "/" +
+             d.getFullYear();
+    }
+  </script>
 </body>
 </html>
+
