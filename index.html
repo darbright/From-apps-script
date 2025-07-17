@@ -29,10 +29,10 @@
         if (data.results.length > 0) {
           resultDiv.innerHTML = data.results.map(row =>
             `<div>
-              <strong>ชื่อไลน์:</strong> ${row.lineName}<br>
-              <strong>อีเมล:</strong> ${row.email}<br>
-              <strong>วันที่เข้า:</strong> ${row.entryDate}<br>
-              <strong>วันหมดอายุ:</strong> ${row.expiryDate}
+              <strong>ชื่อไลน์:</strong> ${row["Line name"] || "-"}<br>
+              <strong>อีเมล:</strong> ${row["Email"] || "-"}<br>
+              <strong>วันที่เข้า:</strong> ${row["Entry date"] || "-"}<br>
+              <strong>วันหมดอายุ:</strong> ${row["Expiry date"] || "-"}
             </div>`
           ).join("<hr>");
         } else {
